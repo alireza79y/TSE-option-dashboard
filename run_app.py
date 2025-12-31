@@ -6,11 +6,9 @@ import os
 import subprocess
 import shutil
 
-# --- 1. تنظیم مسیر پروژه ---
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import config
 
-# --- 2. ایمپورت توابع بک‌اند ---
 try:
     from src.backend.downloader import download_marketwatch_excel
     from src.backend.processor import process_options_from_temp
@@ -20,14 +18,12 @@ except ImportError as e:
     sys.exit(1)
 
 def run_full_update_cycle(is_background=False):
-    """
-    یک دور کامل: دانلود -> پردازش -> مرج
-    """
+
     prefix = "[Background]" if is_background else "[Startup]"
     print("\n" + "-" * 40)
     print(f"{prefix} Starting Update Cycle @ {time.strftime('%H:%M:%S')}...")
 
-    # --- گام اول: دانلود ---
+    # 1
     try:
         dl_result = download_marketwatch_excel()
         if isinstance(dl_result, dict) and not dl_result.get('success', True):
@@ -37,7 +33,7 @@ def run_full_update_cycle(is_background=False):
         print(f"    Download Crash: {e}")
         return False
 
-    # --- گام دوم: پردازش ---
+    # 2
     try:
         temp_file = "temp_market_data.pkl"
         if isinstance(dl_result, dict) and 'temp_file' in dl_result:
@@ -55,7 +51,7 @@ def run_full_update_cycle(is_background=False):
         print(f"    Processing Crash: {e}")
         return False
 
-    # --- گام سوم: مرج نوسان‌ذیری ---
+    # 3
     try:
         target_file = "last_update_option.xlsx"
         if isinstance(process_res, dict) and 'last_update_file' in process_res:
@@ -69,7 +65,7 @@ def run_full_update_cycle(is_background=False):
     except Exception as e:
         print(f"    Merge Error (Skipping HV): {e}")
 
-    # --- گام چهارم: ذخیره نهایی ---
+    # 4
     try:
         if os.path.exists("last_update_option.xlsx"):
             shutil.copy("last_update_option.xlsx", config.FINAL_FILE)
@@ -82,9 +78,9 @@ def run_full_update_cycle(is_background=False):
         return False
 
 def backend_loop():
-    """حلقه آپدیت پس‌زمینه"""
+    
     while True:
-        # اول ۳ دقیقه صبر میکند، چون یک بار اول برنامه اجرا شده
+    
         time.sleep(config.UPDATE_INTERVAL_SECONDS)
         run_full_update_cycle(is_background=True)
 
@@ -93,8 +89,7 @@ def main():
     print("  TSE Options System Initializing...")
     print("="*60)
 
-    # --- تغییر مهم: همیشه اول کار آپدیت کن ---
-    # قبلاً چک می‌کردیم if not os.path.exists. الان برش داشتیم.
+    
     print(" Force Updating Data (Wait 2-3 mins)...")
     
     success = run_full_update_cycle(is_background=False)
@@ -104,12 +99,10 @@ def main():
     else:
         print(" Startup Update Failed (Using old data if available).")
 
-    # --- شروع آپدیت‌کننده خودکار ---
     updater_thread = threading.Thread(target=backend_loop, daemon=True)
     updater_thread.start()
     print(f" Background updater active (Next run in {config.UPDATE_INTERVAL_SECONDS}s)")
 
-    # --- اجرای داشبورد ---
     print("\n Launching Dashboard...")
     dashboard_path = os.path.join("src", "frontend", "dashboard.py")
     cmd = [sys.executable, "-m", "streamlit", "run", dashboard_path]
@@ -120,4 +113,5 @@ def main():
         print("\n[System] Stopping application...")
 
 if __name__ == "__main__":
+
     main()
