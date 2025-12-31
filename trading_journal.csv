@@ -1,0 +1,3 @@
+Date,Symbol,Expiry,Strategy,Entry Price,Notes,Entry Cost,Strikes_Data,Premiums_Data
+2025-12-30 09:20,اهرم,1404/10/24,Straddle,,,4430,"{""call"": 34000, ""put"": 34000}","{""call"": 3308, ""put"": 1122}"
+2025-12-30 09:21,اطلس,1404/11/05,Straddle,,,8718,"{""call"": 95000, ""put"": 95000}","{""call"": 4314, ""put"": 4404}"

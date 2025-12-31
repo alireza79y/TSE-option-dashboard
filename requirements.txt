@@ -1,0 +1,8 @@
+streamlit
+pandas
+openpyxl
+plotly
+jdatetime
+requests
+numpy
+xlsxwriter
